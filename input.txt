@@ -1,0 +1,9 @@
+P|Carl Gustaf|Bernadotte
+T|0768-101801|08-101801
+A|Drottningholms slott|Stockholm|10001
+F|Victoria|2012
+A|Solliden|Öland|10002
+F|Oscar|2016
+T|0702-020202|02-202020
+P|Joe|Biden
+A|White House|Washington, D.C|00000
