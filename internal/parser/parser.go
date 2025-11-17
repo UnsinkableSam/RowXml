@@ -9,8 +9,6 @@ import (
 	d "RowXml.com/internal/model"
 )
 
-// Parse consumes the pipe-delimited input and builds model.People.
-// It performs syntactic validation (record shapes) and returns helpful errors.
 func Parse(input string) (d.People, error) {
 	lines := strings.Split(strings.ReplaceAll(input, "\r\n", "\n"), "\n")
 	var out d.People
@@ -27,8 +25,8 @@ func Parse(input string) (d.People, error) {
 		}
 
 		parts := strings.Split(line, "|")
-		typeToken := parts[0]
-		switch typeToken {
+		t := parts[0]
+		switch t {
 		case "P":
 			if len(parts) < 3 {
 				return d.People{}, fmt.Errorf("line %d: P record must be P|First|Last", lineNo)
@@ -57,42 +55,48 @@ func Parse(input string) (d.People, error) {
 			if len(parts) < 4 {
 				return d.People{}, fmt.Errorf("line %d: A record must be A|Street|City|Postcode", lineNo)
 			}
-			addr := &d.Address{Street: strings.TrimSpace(parts[1]), City: strings.TrimSpace(parts[2]), Postcode: strings.TrimSpace(parts[3])}
+			addr := d.Address{Street: strings.TrimSpace(parts[1]), City: strings.TrimSpace(parts[2]), Postcode: strings.TrimSpace(parts[3])}
 			if currentFamily != nil {
-				currentFamily.Address = addr
+				currentFamily.Address = append(currentFamily.Address, addr)
 			} else if currentPerson != nil {
-				currentPerson.Address = addr
+				currentPerson.Address = append(currentPerson.Address, addr)
 			} else {
-				return d.People{}, fmt.Errorf("line %d: A record without a current person", lineNo)
+				return d.People{}, fmt.Errorf("line %d: A record without a current person or family", lineNo)
 			}
 
 		case "T":
 			if len(parts) < 3 {
 				return d.People{}, fmt.Errorf("line %d: T record must be T|mobile|landline", lineNo)
 			}
-			ph := &d.Phone{Mobile: strings.TrimSpace(parts[1]), Landline: strings.TrimSpace(parts[2])}
+			ph := d.Phone{Mobile: strings.TrimSpace(parts[1]), Landline: strings.TrimSpace(parts[2])}
 			if currentFamily != nil {
-				currentFamily.Phone = ph
+				currentFamily.Phone = append(currentFamily.Phone, ph)
 			} else if currentPerson != nil {
-				currentPerson.Phone = ph
+				currentPerson.Phone = append(currentPerson.Phone, ph)
 			} else {
-				return d.People{}, fmt.Errorf("line %d: T record without a current person", lineNo)
+				return d.People{}, fmt.Errorf("line %d: T record without a current person or family", lineNo)
 			}
 
 		default:
-			return d.People{}, fmt.Errorf("line %d: unknown record type %q", lineNo, typeToken)
+			return d.People{}, fmt.Errorf("line %d: unknown record type %q", lineNo, t)
 		}
 	}
 
 	return out, nil
 }
 
-// ToXML marshals domain.People to pretty XML. We keep this here to avoid an
-// unnecessary dependency on the CLI layer; XML-specific formatting belongs in parser package.
-func ToXML(p d.People) (string, error) {
-	b, err := xml.MarshalIndent(p, " ", " ")
-	if err != nil {
+func RenderXML(p d.People) (string, error) {
+	var buf strings.Builder
+	enc := xml.NewEncoder(&buf)
+	enc.Indent("", "  ")
+
+	if err := enc.Encode(p); err != nil {
 		return "", err
 	}
-	return xml.Header + string(b) + "\n", nil
+
+	return buf.String(), nil
+}
+
+func ToXML(p d.People) (string, error) {
+	return RenderXML(p)
 }
