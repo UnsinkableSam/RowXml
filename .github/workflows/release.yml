@@ -1,47 +1,59 @@
-name: Build and Release
+name: Auto Release
 
 on:
   push:
-    branches:
-      - main
-    tags:
-      - 'v*'  # optional for semantic version releases
+    branches: [ "main" ]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
-    name: Build Go Binaries
+  build-and-release:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
-      fail-fast: false
+        goos: [ linux, windows, darwin ]
+        goarch: [ amd64, arm64 ]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
-      - name: Build
+      - name: Build binary
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
           mkdir -p dist
-          BIN_NAME="RowXml"
+          BINARY_NAME="peopleparser-${{ matrix.goos }}-${{ matrix.goarch }}"
           if [ "${{ matrix.goos }}" = "windows" ]; then
-            BIN_NAME="${BIN_NAME}.exe"
+            BINARY_NAME="${BINARY_NAME}.exe"
           fi
-          go build -o dist/${{ matrix.goos }}_${{ matrix.goarch }}/${BIN_NAME} ./cmd/RowXml
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+          go build -o "dist/${BINARY_NAME}" ./cmd/peopleparser
+
+      - name: Zip artifacts
+        run: |
+          cd dist
+          for file in *; do
+            zip "${file}.zip" "$file"
+          done
+
+      - name: Create or update release
+        id: create_release
+        uses: softprops/action-gh-release@v2
         with:
-          name: RowXml-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/${{ matrix.goos }}_${{ matrix.goarch }}/
+          tag_name: "latest"
+          name: "Latest Auto Build"
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          files: |
+            dist/*.zip
 
