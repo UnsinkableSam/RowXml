@@ -1,0 +1,13 @@
+image: gitpod/workspace-full:latest
+
+tasks:
+  - init: |
+      echo "Downloading RowXML binary..."
+      # Replace URL with your latest GitHub release URL
+      curl -L -o rowxml https://github.com/<user>/<repo>/releases/latest/download/rowxml-linux-amd64
+      chmod +x rowxml
+    command: |
+      echo "RowXML binary is ready!"
+      echo "Try: ./rowxml \"P|Joe|Biden\nA|White House|Washington, D.C|00000\""
+      bash
+
