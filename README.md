@@ -1,214 +1,83 @@
-# RowXML Converter
+# RowXml -- Line-Based Format → XML Converter
 
-Convert a custom line-based format (P/T/A/F records) into clean XML.
+A small and robust CLI tool written in Go that converts a custom Swedish
+line-based format into structured XML.
 
-
-This tool converts input like:
-
-```
-P|Carl Gustaf|Bernadotte
-T|0768-101801|08-101801
-A|Drottningholms slott|Stockholm|10001
-F|Victoria|2012
-A|Solliden|Öland|10002
-T|0702-020202|02-202020
-```
-
-Into:
-
-```xml
-<people>
-  <person>
-    <firstname>Carl Gustaf</firstname>
-    <lastname>Bernadotte</lastname>
-    ...
-  </person>
-</people>
-```
-
----
-
-## 🚀 Features
-
-* Converts custom P/T/A/F formatted text into structured XML
-* Fully validated structure (wrong records produce meaningful errors)
-* Supports multiple phone/address/family entries
-* Strict ordering rules (T grouped together, A grouped together, etc.)
-* Works on **macOS**, **Linux**, **Windows**
-* Distributed as binaries via GitHub Releases
-* Fully tested (unit + integration tests)
-
----
+The tool supports: - Reading input from **file**, **raw string**, or
+**stdin** - Multiple `P` (person), `F` (family), `A` (address), `T`
+(phone) entries - Validated and ordered XML output - Cross-platform
+binaries (Linux / macOS / Windows) - Automated releases created via
+GitHub Actions
 
 ## 📦 Installation
 
-### Option 1 — Download Prebuilt Executables
+### Download prebuilt binaries (Linux/macOS/Windows)
 
-Each push to `main` triggers GitHub Actions which automatically builds releases.
+Browse the latest release here:
 
-1. Go to **GitHub → Releases**
-2. Download the binary for your OS:
+➡️ **GitHub Releases**\
+https://github.com/UnsinkableSam/RowXml/releases
 
-| OS              | File                       |
-| --------------- | -------------------------- |
-| macOS (arm64)   | `rowxml-darwin-arm64`      |
-| macOS (amd64)   | `rowxml-darwin-amd64`      |
-| Linux (amd64)   | `rowxml-linux-amd64`       |
-| Windows (amd64) | `rowxml-windows-amd64.exe` |
+Make it executable:
 
-### Make it executable (Linux/macOS)
-
-```bash
-chmod +x rowxml-*
+``` sh
+chmod +x rowxml-linux-amd64
+mv rowxml-linux-amd64 rowxml
 ```
 
----
+## 🚀 Usage
 
-### Option 2 — Install From Source
+### 1️⃣ Using a File
 
-```bash
-git clone https://github.com/<yourname>/<repo>.git
-cd <repo>
-go build -o rowxml ./cmd/rowxml
+``` sh
+rowxml convert --file input.txt
 ```
 
----
+### 2️⃣ Passing Raw Data as a String
 
-## 🏃 Running the CLI
-
-The program accepts input as **a single argument string**.
-
-### Example:
-
-```bash
-./rowxml "P|Joe|Biden
+``` sh
+rowxml convert --data "P|Joe|Biden
 A|White House|Washington, D.C|00000"
 ```
 
-Or with a heredoc:
+### 3️⃣ Using Stdin
 
-```bash
-./rowxml "$(cat <<EOF
-P|Victoria|Bernadotte
-T|070-0101010|0459-123456
-A|Haga Slott|Stockholm|101
-EOF
-)"
+``` sh
+cat input.txt | rowxml convert
 ```
-
-It prints XML to stdout.
-
----
-
-## 📘 Usage
-
-### Input Specification
-
-| Tag | Meaning |           |                   |                   |
-| --- | ------- | --------- | ----------------- | ----------------- |
-| `P  | first   | last`     | Start new person  |                   |
-| `T  | mobile  | landline` | Add phone entry   |                   |
-| `A  | street  | city      | postcode`         | Add address entry |
-| `F  | name    | bornYear` | Add family member |                   |
-
-### Structural Rules
-
-* `P` starts a new `<person>`
-* `P` may be followed by: `T`, `A`, `F`
-* `F` may be followed by: `T`, `A`
-* Multiple `T` and `A` entries allowed
-* XML tag order is normalized (all phone entries grouped, all address entries grouped, etc.)
-
----
 
 ## 🧪 Running Tests
 
-All tests are standard Go tests.
-
-### Run the entire test suite:
-
-```bash
+``` sh
 go test ./...
 ```
 
-### Run with verbose output:
+## 🏗 Project Structure
 
-```bash
-go test -v ./...
+    RowXml/
+      cmd/rowxml/
+      internal/
+        parser/
+        validator/
+        xml/
+        model/
+      testdata/
+      .github/workflows/
+
+## 🔄 GitHub CI/CD
+
+Tag a release:
+
+``` sh
+git tag v1.0.0
+git push origin v1.0.0
 ```
 
-### Run a specific test:
+## 📖 Specification
 
-```bash
-go test -run TestFullExampleCorrected ./...
-```
+P\|förnamn\|efternamn\
+T\|mobilnummer\|fastnätsnummer\
+A\|gata\|stad\|postnummer\
+F\|namn\|födelseår
 
----
-
-## 🛠 Project Structure
-
-```
-.
-├── cmd/
-│   └── rowxml/
-│       └── main.go      # CLI entrypoint
-├── internal/
-│   ├── model/
-│   │   └── model.go     # XML structs
-│   ├── parser/
-│   │   ├── parser.go    # Parse P/T/A/F to People model
-├── go.mod
-└── README.md
-```
-
----
-
-## 🧩 Exit Codes
-
-| Code | Meaning                      |
-| ---- | ---------------------------- |
-| `0`  | OK                           |
-| `1`  | Invalid input or parse error |
-
----
-
-## 🔧 Building Binaries Manually
-
-Build for all major platforms:
-
-```bash
-GOOS=linux   GOARCH=amd64 go build -o rowxml-linux-amd64   ./cmd/rowxml
-GOOS=darwin  GOARCH=arm64 go build -o rowxml-darwin-arm64  ./cmd/rowxml
-GOOS=darwin  GOARCH=amd64 go build -o rowxml-darwin-amd64  ./cmd/rowxml
-GOOS=windows GOARCH=amd64 go build -o rowxml-windows-amd64.exe ./cmd/rowxml
-```
-
----
-
-## 🤖 GitHub Actions (Automatic Releases)
-
-Your workflow automatically:
-
-1. Builds binaries for all OS targets
-2. Runs all tests
-3. Uploads binaries to a GitHub Release
-
-Users can download the latest version without compiling.
-
----
-
-## 📄 License
-
-MIT — free to use anywhere.
-
----
-
-## 🎉 Next Steps / Optional Enhancements
-
-* Add interactive mode (read from stdin)
-* Add `--input-file` flag
-* Add golden XML output tests
-* Generate man pages or completions (bash/zsh/fish)
-* Add benchmarks and fuzz tests
-* CI checks: `go vet`, `golangci-lint`
-
+This tool fully implements the specification.
