@@ -77,6 +77,22 @@ func Parse(input string) (d.People, error) {
 				return d.People{}, fmt.Errorf("line %d: T record without a current person or family", lineNo)
 			}
 
+			validatePhone := func(s string) bool {
+				for _, r := range s {
+					if r >= '0' && r <= '9' {
+						return true
+					}
+				}
+				return false
+			}
+
+			mobile := strings.TrimSpace(parts[1])
+			landline := strings.TrimSpace(parts[2])
+
+			if !validatePhone(mobile) || !validatePhone(landline) {
+				return d.People{}, fmt.Errorf("line %d: invalid phone number", lineNo)
+			}
+
 		default:
 			return d.People{}, fmt.Errorf("line %d: unknown record type %q", lineNo, t)
 		}
@@ -87,10 +103,133 @@ func Parse(input string) (d.People, error) {
 
 func RenderXML(p d.People) (string, error) {
 	var buf strings.Builder
+	// include xml header
+	buf.WriteString(xml.Header)
+
 	enc := xml.NewEncoder(&buf)
 	enc.Indent("", "  ")
 
-	if err := enc.Encode(p); err != nil {
+	// start <people>
+	if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "people"}}); err != nil {
+		return "", err
+	}
+
+	for _, person := range p.People {
+		// <person>
+		if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "person"}}); err != nil {
+			return "", err
+		}
+
+		// firstname
+		if err := enc.EncodeElement(person.FirstName, xml.StartElement{Name: xml.Name{Local: "firstname"}}); err != nil {
+			return "", err
+		}
+		// lastname
+		if err := enc.EncodeElement(person.LastName, xml.StartElement{Name: xml.Name{Local: "lastname"}}); err != nil {
+			return "", err
+		}
+
+		// all addresses
+		for _, a := range person.Address {
+			if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "address"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(a.Street, xml.StartElement{Name: xml.Name{Local: "street"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(a.City, xml.StartElement{Name: xml.Name{Local: "city"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(a.Postcode, xml.StartElement{Name: xml.Name{Local: "postcode"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "address"}}); err != nil {
+				return "", err
+			}
+		}
+
+		// all phones
+		for _, ph := range person.Phone {
+			if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "phone"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(ph.Mobile, xml.StartElement{Name: xml.Name{Local: "mobile"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(ph.Landline, xml.StartElement{Name: xml.Name{Local: "landline"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "phone"}}); err != nil {
+				return "", err
+			}
+		}
+
+		// families (arrival order)
+		for _, f := range person.Family {
+			if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "family"}}); err != nil {
+				return "", err
+			}
+			if err := enc.EncodeElement(f.Name, xml.StartElement{Name: xml.Name{Local: "name"}}); err != nil {
+				return "", err
+			}
+			// born as text
+			if err := enc.EncodeElement(fmt.Sprintf("%d", f.Born), xml.StartElement{Name: xml.Name{Local: "born"}}); err != nil {
+				return "", err
+			}
+
+			// family addresses
+			for _, a := range f.Address {
+				if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "address"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeElement(a.Street, xml.StartElement{Name: xml.Name{Local: "street"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeElement(a.City, xml.StartElement{Name: xml.Name{Local: "city"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeElement(a.Postcode, xml.StartElement{Name: xml.Name{Local: "postcode"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "address"}}); err != nil {
+					return "", err
+				}
+			}
+
+			// family phones
+			for _, ph := range f.Phone {
+				if err := enc.EncodeToken(xml.StartElement{Name: xml.Name{Local: "phone"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeElement(ph.Mobile, xml.StartElement{Name: xml.Name{Local: "mobile"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeElement(ph.Landline, xml.StartElement{Name: xml.Name{Local: "landline"}}); err != nil {
+					return "", err
+				}
+				if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "phone"}}); err != nil {
+					return "", err
+				}
+			}
+
+			// </family>
+			if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "family"}}); err != nil {
+				return "", err
+			}
+		}
+
+		// </person>
+		if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "person"}}); err != nil {
+			return "", err
+		}
+	}
+
+	// end </people>
+	if err := enc.EncodeToken(xml.EndElement{Name: xml.Name{Local: "people"}}); err != nil {
+		return "", err
+	}
+
+	if err := enc.Flush(); err != nil {
 		return "", err
 	}
 
