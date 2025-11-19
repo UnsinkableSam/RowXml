@@ -60,7 +60,7 @@ rowxml --file input.txt
 ### 2️⃣ Passing Raw Data as a String
 
 ``` sh
-rowxml --data "P|Joe|Biden
+rowxml --string "P|Joe|Biden
 A|White House|Washington, D.C|00000"
 ```
 
