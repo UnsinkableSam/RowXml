@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"io"
 
 	"RowXml.com/internal/logging"
 	"RowXml.com/internal/parser"
@@ -12,32 +13,38 @@ import (
 )
 
 func main() {
-	var fromStdin bool
-	flag.BoolVar(&fromStdin, "stdin", false, "read input from stdin (default: first arg)")
+	fileInput := flag.String("file", "", "Path to input file")
+	stringInput := flag.String("string", "", "Raw input string")
 	flag.Parse()
 
-	logger := logging.NewStdLogger()
-	var raw string
+	var data string
 	var err error
 
-	if fromStdin {
-		// read all from stdin
-		b, readErr := os.ReadFile("/dev/stdin")
-		if readErr != nil {
-			logger.Error("failed to read stdin", "err", readErr)
-			fmt.Fprintln(os.Stderr, readErr)
+	logger := logging.NewStdLogger()
+
+	switch {
+	case *fileInput != "":
+		bytes, err := os.ReadFile(*fileInput)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 			os.Exit(1)
 		}
-		raw = string(b)
-	} else {
-		if flag.NArg() < 1 {
-			fmt.Fprintln(os.Stderr, "Usage: rowxml [--stdin] \"INPUT_STRING\"")
-			os.Exit(2)
+		data = string(bytes)
+
+	case *stringInput != "":
+		data = *stringInput
+
+	default:
+		// If nothing provided, read from stdin
+		stdinBytes, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading stdin: %v\n", err)
+			os.Exit(1)
 		}
-		raw = flag.Arg(0)
+		data = string(stdinBytes)
 	}
 
-	people, err := parser.Parse(raw)
+	people, err := parser.Parse(data)
 	if err != nil {
 		logger.Error("parse failed", "err", err)
 		fmt.Fprintln(os.Stderr, err)
@@ -59,4 +66,3 @@ func main() {
 
 	fmt.Print(out)
 }
-

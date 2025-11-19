@@ -20,9 +20,27 @@ https://github.com/UnsinkableSam/RowXml/releases
 
 Make it executable:
 
-``` sh
+## 🐧 Linux
+```bash
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-linux-amd64
 chmod +x rowxml-linux-amd64
-mv rowxml-linux-amd64 rowxml
+sudo mv rowxml-linux-amd64 /usr/local/bin/rowxml```
+
+## 🍎 macOS Installation (Intel)
+```bash
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
+chmod +x rowxml-darwin-amd64
+sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml```
+
+## 🍎 macOS Installation
+```bash
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
+chmod +x rowxml-darwin-amd64
+sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml```
+
+## 🪟 Windows Installation
+```powershell
+Invoke-WebRequest -Uri "https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-windows-amd64.exe" -OutFile rowxml-windows-amd64.exe
 ```
 
 ## 🚀 Usage
@@ -30,20 +48,20 @@ mv rowxml-linux-amd64 rowxml
 ### 1️⃣ Using a File
 
 ``` sh
-rowxml convert --file input.txt
+rowxml --file input.txt
 ```
 
 ### 2️⃣ Passing Raw Data as a String
 
 ``` sh
-rowxml convert --data "P|Joe|Biden
+rowxml --data "P|Joe|Biden
 A|White House|Washington, D.C|00000"
 ```
 
 ### 3️⃣ Using Stdin
 
 ``` sh
-cat input.txt | rowxml convert
+cat input.txt | rowxml
 ```
 
 ## 🧪 Running Tests
