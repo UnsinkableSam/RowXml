@@ -24,19 +24,25 @@ Make it executable:
 ```bash
 wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-linux-amd64
 chmod +x rowxml-linux-amd64
-sudo mv rowxml-linux-amd64 /usr/local/bin/rowxml```
+sudo mv rowxml-linux-amd64 /usr/local/bin/rowxml
+```
+
 
 ## 🍎 macOS Installation (Intel)
 ```bash
 wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
 chmod +x rowxml-darwin-amd64
-sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml```
+sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml
+```
+
+
 
 ## 🍎 macOS Installation
 ```bash
 wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
 chmod +x rowxml-darwin-amd64
-sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml```
+sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml
+```
 
 ## 🪟 Windows Installation
 ```powershell
