@@ -16,8 +16,23 @@ func Parse(input string) (model.People, error) {
 	var currentPerson *model.Person
 	var currentFamily *model.Family
 
+	var prevType string
+
 	for i, tk := range toks {
+
 		lineNo := i + 1
+
+		switch prevType {
+		case "F":
+			if tk.typ != "T" && tk.typ != "A" {
+				return model.People{}, newParseError(lineNo, fmt.Sprintf("F cannot be followed by %s", tk.typ))
+			}
+		case "P":
+			if tk.typ != "T" && tk.typ != "A" && tk.typ != "F" {
+				return model.People{}, newParseError(lineNo, fmt.Sprintf("P cannot be followed by %s", tk.typ))
+			}
+		}
+
 		switch tk.typ {
 		case "P":
 			if len(tk.parts) < 3 {
@@ -71,8 +86,10 @@ func Parse(input string) (model.People, error) {
 		default:
 			return model.People{}, newParseError(lineNo, fmt.Sprintf("unknown record type %q", tk.typ))
 		}
+
+		prevType = tk.typ
+
 	}
 
 	return out, nil
 }
-

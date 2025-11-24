@@ -78,3 +78,98 @@ func TestParse_FBeforeP(t *testing.T) {
 	}
 }
 
+func TestParse_TWithoutContext(t *testing.T) {
+	input := "T|070-1111111|08-111111"
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for T without a current person or family")
+	}
+	if !strings.Contains(err.Error(), "T record without a current person or family") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_AWithoutContext(t *testing.T) {
+	input := "A|Storgatan 1|Stockholm|11111"
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for A without a current person or family")
+	}
+	if !strings.Contains(err.Error(), "A record without a current person or family") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_FFollowedByF(t *testing.T) {
+	input := strings.Join([]string{
+		"P|Anna|Svensson",
+		"F|Elsa|2010",
+		"F|Olivia|2012",
+	}, "\n")
+
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for F followed by F")
+	}
+	if !strings.Contains(err.Error(), "F cannot be followed by F") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_InvalidP(t *testing.T) {
+	input := "P|Johan"
+
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for malformed P record")
+	}
+	if !strings.Contains(err.Error(), "P record must be P|First|Last") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_InvalidT(t *testing.T) {
+	input := strings.Join([]string{
+		"P|Greta|Holm",
+		"T|070-1234567",
+	}, "\n")
+
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for malformed T record")
+	}
+	if !strings.Contains(err.Error(), "T record must be T|mobile|landline") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_InvalidF(t *testing.T) {
+	input := strings.Join([]string{
+		"P|Olle|Andersson",
+		"F|Saknas",
+	}, "\n")
+
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for malformed F record")
+	}
+	if !strings.Contains(err.Error(), "F record must be F|Name|Born") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParse_FFollowedByP(t *testing.T) {
+	input := strings.Join([]string{
+		"P|Karl|Nilsson",
+		"F|Erik|2012",
+		"P|Lisa|Karlsson",
+	}, "\n")
+
+	_, err := Parse(input)
+	if err == nil {
+		t.Fatalf("expected error for P after F")
+	}
+	if !strings.Contains(err.Error(), "F cannot be followed by P") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
