@@ -22,31 +22,31 @@ Make it executable:
 
 ## 🐧 Linux
 ```bash
-wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-linux-amd64
-chmod +x rowxml-linux-amd64
-sudo mv rowxml-linux-amd64 /usr/local/bin/rowxml
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/RowXml-linux-amd64
+chmod +x RowXml-linux-amd64
+sudo mv RowXml-linux-amd64 /usr/local/bin/rowxml
 ```
 
 
 ## 🍎 macOS Installation (Intel)
 ```bash
-wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
-chmod +x rowxml-darwin-amd64
-sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/RowXml-darwin-amd64
+chmod +x RowXml-darwin-amd64
+sudo mv RowXml-darwin-amd64 /usr/local/bin/rowxml
 ```
 
 
 
 ## 🍎 macOS Installation
 ```bash
-wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-darwin-amd64
+wget https://github.com/UnsinkableSam/RowXml/releases/latest/download/RowXml-darwin-amd64
 chmod +x rowxml-darwin-amd64
-sudo mv rowxml-darwin-amd64 /usr/local/bin/rowxml
+sudo mv RowXml-darwin-amd64 /usr/local/bin/rowxml
 ```
 
 ## 🪟 Windows Installation
 ```powershell
-Invoke-WebRequest -Uri "https://github.com/UnsinkableSam/RowXml/releases/latest/download/rowxml-windows-amd64.exe" -OutFile rowxml-windows-amd64.exe
+Invoke-WebRequest -Uri "https://github.com/UnsinkableSam/RowXml/releases/latest/download/RowXml-windows-amd64.exe" -OutFile rowxml-windows-amd64.exe
 ```
 
 ## 🚀 Usage
@@ -54,20 +54,20 @@ Invoke-WebRequest -Uri "https://github.com/UnsinkableSam/RowXml/releases/latest/
 ### 1️⃣ Using a File
 
 ``` sh
-rowxml --file input.txt
+RowXml --file input.txt
 ```
 
 ### 2️⃣ Passing Raw Data as a String
 
 ``` sh
-rowxml --string "P|Joe|Biden
+RowXml --string "P|Joe|Biden
 A|White House|Washington, D.C|00000"
 ```
 
 ### 3️⃣ Using Stdin
 
 ``` sh
-cat input.txt | rowxml
+cat input.txt | RowXml
 ```
 
 ## 🧪 Running Tests
@@ -79,7 +79,7 @@ go test ./...
 ## 🏗 Project Structure
 
     RowXml/
-      cmd/rowxml/
+      cmd/RowXml/
       internal/
         parser/
         validator/
